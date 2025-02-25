@@ -62,7 +62,7 @@ def uniLaplace(single):
     Returns:
         float: The probability based on Laplace smoothing for the unigram
     """
-        return (uniCount[single] + 1) / (uniTotal + abs(len(uni)))
+        return (uniCount[single] + 1) / (uniTotal + len(uni))
 
 def biLaplace(double, previous):
     """
@@ -75,7 +75,7 @@ def biLaplace(double, previous):
     Returns:
         float: The probability based on Laplace smoothing for the bigram
     """
-    return (biCount[double] + 1) / (float(uniCount[previous]) + abs(len(bi)))
+    return (biCount[double] + 1) / (float(uniCount[previous]) + len(bi))
 
 def uniAddK(single, k):
     """
@@ -87,7 +87,7 @@ def uniAddK(single, k):
     Returns:
         float: The probability based on Add-k smoothing for the unigram
     """
-    return (uni[single] + k) / (uniTotal + (abs(len(uni)) * k))
+    return (uni[single] + k) / (uniTotal + (len(uni) * k))
 
 def biAddK(double, previous, k):
     """
@@ -100,7 +100,7 @@ def biAddK(double, previous, k):
     Returns:
         float: The probability based on Add-k smoothing for the bigram
     """
-    return(bi[double] + k) / (float(uni[previous]) + (abs(len(bi)) * k))
+    return(bi[double] + k) / (float(uni[previous]) + (len(bi) * k))
 
 numberOfTokens = 0
 
