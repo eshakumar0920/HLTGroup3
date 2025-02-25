@@ -35,7 +35,7 @@ def knownBi(double, previous):
     if it does, the token is given back.
     If it does not, it increases the unknown counter in the bigram counter.
     Then it calculates and stores the probability for the bigram by
-    dividing the unknown counter with the count of the the previous token.
+    dividing the unknown counter with the count of the previous token.
     Finally, the function returns the unknown token.
     
     Parameters:
