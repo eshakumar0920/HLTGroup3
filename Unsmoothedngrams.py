@@ -13,7 +13,8 @@ def preprocess(text):
 def compute_unigram_probabilities(tokens):
     """Compute unigram probabilities."""
     unigram_counts = Counter(tokens)
-    global total_tokens = sum(unigram_counts.values())
+    global total_tokens
+    total_tokens = sum(unigram_counts.values())
     unigram_probs = {word: count / total_tokens for word, count in unigram_counts.items()}
     return unigram_probs, unigram_counts
 
