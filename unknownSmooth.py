@@ -1,11 +1,8 @@
-# Tentative name for unigram dictionary/hashmap: uni
-# Tentative name for bigram dictionary/hashmap: bi
-# Tentative name for unigram count dictionary/hashmap: uniCount
-# Tentative name for bigram count dictionary/hashmap: biCount
-# bigram token can have the two names combined to make it easier like "apple" and "tree" become "apple tree"
-# If a dictionary is used, you can check unknown using word "in" dictionary. It will return false if the token is not in. 
-# Change uniTotal into a float variable
-# Add unknown token beforehand and set the value to 0
+# Setting the unigram_counts, unigram_probs, bigram_counts, and bigram_probs to contain the "UNK".
+unigram_counts["UNK"] = 0
+unigram_probs["UNK"] = 0
+bigram_counts["UNK"] = 0
+bigram_probs["UNK"] = 0
 
 def knownUni(single):
     """
@@ -21,12 +18,12 @@ def knownUni(single):
     Returns:
         string: The same token given or the unknown token
     """
-    if single in uni:
+    if single in unigram_probs:
         return single
     else:
-        uniCount["UNK"] += 1
+        unigram_counts["UNK"] += 1
         total_tokens += 1
-        uni["UNK"] = uniCount["UNK"] / total_tokens
+        unigram_probs["UNK"] = unigram_counts["UNK"] / total_tokens
         return "UNK"
 
 def knownBi(double, previous):
@@ -48,8 +45,8 @@ def knownBi(double, previous):
     if double in bi:
         return double
     else:
-        biCount["UNK"] = biCount["UNK"] + 1
-        bi["UNK"] = biCount[double] / float(uniCount[previous])
+        bigram_counts["UNK"] += 1
+        bigram_probs["UNK"] = bigram_counts[double] / float(unigram_counts[previous])
         return "UNK"
 
 def uniLaplace(single):
@@ -62,7 +59,7 @@ def uniLaplace(single):
     Returns:
         float: The probability based on Laplace smoothing for the unigram
     """
-        return (uniCount[single] + 1) / (uniTotal + len(uni))
+        return (unigram_counts[single] + 1) / (total_tokens + len(unigram_probs))
 
 def biLaplace(double, previous):
     """
@@ -75,7 +72,7 @@ def biLaplace(double, previous):
     Returns:
         float: The probability based on Laplace smoothing for the bigram
     """
-    return (biCount[double] + 1) / (float(uniCount[previous]) + len(bi))
+    return (bigram_counts[double] + 1) / (float(unigram_counts[previous]) + len(bigram_probs))
 
 def uniAddK(single, k):
     """
@@ -87,7 +84,7 @@ def uniAddK(single, k):
     Returns:
         float: The probability based on Add-k smoothing for the unigram
     """
-    return (uni[single] + k) / (total_tokens + (len(uni) * k))
+    return (unigram_probs[single] + k) / (total_tokens + (len(unigram_probs) * k))
 
 def biAddK(double, previous, k):
     """
@@ -100,7 +97,7 @@ def biAddK(double, previous, k):
     Returns:
         float: The probability based on Add-k smoothing for the bigram
     """
-    return(bi[double] + k) / (float(uni[previous]) + (len(bi) * k))
+    return(bigram_counts[double] + k) / (float(unigram_counts[previous]) + (len(bigram_probs) * k))
 
 numberOfTokens = 0
 
@@ -124,7 +121,7 @@ with open('val.txt', 'r') as file:
         # Muliplication of probabilities for the first token in the sentence
         uniLaplaceProb *= uniLaplace(single)
         uniAddKProb *= uniAddK(single, 0.01)
-        uniUnsmoothProb *= uni[single]
+        uniUnsmoothProb *= unigram_probs[single]
         
         for token in lineList[1].split():
             nextSingle = token
@@ -133,7 +130,7 @@ with open('val.txt', 'r') as file:
             # Multiplcation of probabilities for the rest of the tokens in the sentence
             uniLaplaceProb *= uniLaplace(nextSingle)
             uniAddKProb *= uniAddK(nextSingle, 0.01)
-            uniUnsmoothProb *= uni[nextSingle]
+            uniUnsmoothProb *= unigram_probs[nextSingle]
             
             numberOfTokens += 1
             
@@ -142,7 +139,7 @@ with open('val.txt', 'r') as file:
             bigramWord = knownBi(bigramWord, single)
             biLaplaceProb *= biLaplace(bigramWord, single)
             biAddKProb *= biAddK(bigramWord, single, 0.01)
-            biUnsmoothProb *= bi[bigramWord]
+            biUnsmoothProb *= bigram_probs[bigramWord]
             
             #For the next bigram
             single = nextSingle
