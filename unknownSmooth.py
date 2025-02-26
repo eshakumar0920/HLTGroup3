@@ -59,7 +59,7 @@ def uniLaplace(single):
     Returns:
         float: The probability based on Laplace smoothing for the unigram
     """
-        return (unigram_counts[single] + 1) / (total_tokens + len(unigram_probs))
+    return (unigram_counts[single] + 1) / (total_tokens + len(unigram_probs))
 
 def biLaplace(double, previous):
     """
