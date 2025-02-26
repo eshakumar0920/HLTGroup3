@@ -25,8 +25,8 @@ def knownUni(single):
         return single
     else:
         uniCount["UNK"] += 1
-        uniTotal += 1
-        uni["UNK"] = uniCount["UNK"] / uniTotal
+        total_tokens += 1
+        uni["UNK"] = uniCount["UNK"] / total_tokens
         return "UNK"
 
 def knownBi(double, previous):
