@@ -102,45 +102,59 @@ def biAddK(double, previous, k):
 
 numberOfTokens = 0
 
-# Assigning the probabilities to one for addition
-uniUnsmoothProb = 0
-uniLaplaceProb = 0
-uniAddKProb = 0
-biUnsmoothProb = 0
-biLaplaceProb = 0
-biAddKProb = 0
+# Assigning the probabilities
+uniUnsmoothTotal = 0
+uniLaplaceTotal = 0
+uniAddKTotal = 0
+biUnsmoothTotal = 0
+biLaplaceTotal = 0
+biAddkTotal = 0
 
 with open('val.txt', 'r') as file:
     for line in file:
         # Split the first token and the rest of the line into a list of 2
         lineList = line.split(" ", 1)
         single = knownUni(lineList[0])
+
+        uniUnsmoothProb = 1
+        uniLaplaceProb = 1
+        uniAddKProb = 1
+        biUnsmoothProb = 1
+        biLaplaceProb = 1
+        biAddKProb = 1
         
         # Number of tokens increase for the first word and end of sentence <s>
         numberOfTokens += 2
         
         # Muliplication of probabilities for the first token in the sentence
-        uniLaplaceProb += uniLaplace(single)
-        uniAddKProb += uniAddK(single, 0.01)
-        uniUnsmoothProb += unigram_probs[single]
+        uniLaplaceProb *= uniLaplace(single)
+        uniAddKProb *= uniAddK(single, 0.01)
+        uniUnsmoothProb *= unigram_probs[single]
         
         for token in lineList[1].split():
             nextSingle = token
             nextSingle = knownUni(nextSingle)
             
             # Multiplcation of probabilities for the rest of the tokens in the sentence
-            uniLaplaceProb += uniLaplace(nextSingle)
-            uniAddKProb += uniAddK(nextSingle, 0.01)
-            uniUnsmoothProb += unigram_probs[nextSingle]
+            uniLaplaceProb *= uniLaplace(nextSingle)
+            uniAddKProb *= uniAddK(nextSingle, 0.01)
+            uniUnsmoothProb *= unigram_probs[nextSingle]
             
             numberOfTokens += 1
             
             #Bigram token checked
             bigramWord = single + " " + nextSingle
             bigramWord = knownBi(bigramWord, single)
-            biLaplaceProb += biLaplace(bigramWord, single)
-            biAddKProb += biAddK(bigramWord, single, 0.01)
-            biUnsmoothProb += bigram_probs[bigramWord]
+            biLaplaceProb *= biLaplace(bigramWord, single)
+            biAddKProb *= biAddK(bigramWord, single, 0.01)
+            biUnsmoothProb *= bigram_probs[bigramWord]
             
             #For the next bigram
             single = nextSingle
+
+        uniUnsmoothTotal += uniUnsmoothProb
+        uniLaplaceTotal += uniLaplaceProb
+        uniAddKTotal += uniAddKProb
+        biUnsmoothTotal += biUnsmoothProb
+        biLaplaceTotal += biLaplaceProb
+        biAddKTotal += biAddKProb
