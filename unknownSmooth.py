@@ -87,7 +87,7 @@ def uniAddK(single, k):
     Returns:
         float: The probability based on Add-k smoothing for the unigram
     """
-    return (uni[single] + k) / (uniTotal + (len(uni) * k))
+    return (uni[single] + k) / (total_tokens + (len(uni) * k))
 
 def biAddK(double, previous, k):
     """
