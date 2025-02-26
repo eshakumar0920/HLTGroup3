@@ -1,8 +1,8 @@
 # Setting the unigram_counts, unigram_probs, bigram_counts, and bigram_probs to contain the "UNK".
 unigram_counts["UNK"] = 0
 unigram_probs["UNK"] = 0
-bigram_counts["UNK UNK"] = 0
-bigram_probs["UNK UNK"] = 0
+bigram_counts["UNK"] = 0
+bigram_probs["UNK"] = 0
 
 def knownUni(single):
     """
@@ -47,7 +47,7 @@ def knownBi(double, previous):
         return double
     else:
         bigram_counts["UNK"] += 1
-        bigram_probs["UNK"] = bigram_counts[double] / float(unigram_counts[previous])
+        bigram_probs["UNK"] = bigram_counts["UNK"] / float(unigram_counts[previous])
         return "UNK"
 
 def uniLaplace(single):
