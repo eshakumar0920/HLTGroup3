@@ -102,7 +102,7 @@ def biAddK(double, previous, k):
 
 numberOfTokens = 0
 
-# Assigning the probabilities to one for multiplication
+# Assigning the probabilities to one for addition
 uniUnsmoothProb = 0
 uniLaplaceProb = 0
 uniAddKProb = 0
