@@ -108,7 +108,7 @@ uniLaplaceTotal = 0
 uniAddKTotal = 0
 biUnsmoothTotal = 0
 biLaplaceTotal = 0
-biAddkTotal = 0
+biAddKTotal = 0
 
 with open('val.txt', 'r') as file:
     for line in file:
