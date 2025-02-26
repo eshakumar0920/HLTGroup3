@@ -1,8 +1,8 @@
 # Setting the unigram_counts, unigram_probs, bigram_counts, and bigram_probs to contain the "UNK".
 unigram_counts["UNK"] = 0
 unigram_probs["UNK"] = 0
-bigram_counts["UNK"] = 0
-bigram_probs["UNK"] = 0
+bigram_counts["UNK UNK"] = 0
+bigram_probs["UNK UNK"] = 0
 
 def knownUni(single):
     """
@@ -22,6 +22,7 @@ def knownUni(single):
         return single
     else:
         unigram_counts["UNK"] += 1
+        global total_tokens
         total_tokens += 1
         unigram_probs["UNK"] = unigram_counts["UNK"] / total_tokens
         return "UNK"
@@ -42,7 +43,7 @@ def knownBi(double, previous):
     Returns:
         string: The same token given or the unknown token
     """
-    if double in bi:
+    if double in bigram_probs:
         return double
     else:
         bigram_counts["UNK"] += 1
