@@ -1,6 +1,8 @@
 import re
 from collections import Counter
 
+total_tokens = 0
+
 def preprocess(text):
     """Lowercase and tokenize text with improved normalization."""
     text = text.lower()
