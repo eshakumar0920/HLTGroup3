@@ -42,26 +42,6 @@ def process_corpus(file_path):
     
     return unigram_probs, bigram_probs, unigram_counts, bigram_counts
 
-if __name__ == "__main__":
-    file_path = "train.txt"  # Adjust path if necessary
-    unigram_probs, bigram_probs, unigram_counts, bigram_counts = process_corpus(file_path)
-    
-    print("Sample Unigram Probabilities:")
-    for word, prob in list(unigram_probs.items())[:10]:  # Display first 10 unigrams
-        print(f"P({word}) = {prob:.4f}")
-    
-    print("\nSample Bigram Probabilities:")
-    for bigram, prob in list(bigram_probs.items())[:10]:  # Display first 10 bigrams
-        print(f"P({bigram[1]} | {bigram[0]}) = {prob:.4f}")
-
-# Smoothing
-
-# Setting the unigram_counts, unigram_probs, bigram_counts, and bigram_probs to contain the "UNK".
-unigram_counts["UNK"] = 0
-unigram_probs["UNK"] = 0
-bigram_counts["UNK UNK"] = 0
-bigram_probs["UNK UNK"] = 0
-
 def knownUni(single):
     """
     The function checks if the token given exists in the unigram dictionary;
@@ -158,126 +138,80 @@ def biAddK(double, previous, k):
     """
     return(bigram_counts[double] + k) / (float(unigram_counts[previous]) + (len(bigram_probs) * k))
 
-numberOfTokens = 0
+def calculateProbabilities():
+    numberOfTokens = 0
 
-# Assigning the probabilities
-uniUnsmoothTotal = Decimal(0)
-uniLaplaceTotal = 0
-uniAddKTotal = 0
-biUnsmoothTotal = 0
-biLaplaceTotal = 0
-biAddKTotal = 0
+    with open('val.txt', 'r') as file:
+        for line in file:
+            # Split the first token and the rest of the line into a list of 2
+            lineList = line.split(" ", 1)
+            single = knownUni(lineList[0])
+            
+            uniUnsmoothProb = 1
+            uniLaplaceProb = 1
+            uniAddKProb = 1
+            biUnsmoothProb = 1
+            biLaplaceProb = 1
+            biAddKProb = 1
+            
+            # Number of tokens increase for the first word and end of sentence <s>
+            numberOfTokens += 2
+            
+            # Muliplication of probabilities for the first token in the sentence
+            uniLaplaceProb *= math.log(uniLaplace(single))
+            uniAddKProb *= math.log(uniAddK(single, 0.01))
+            uniUnsmoothProb *= math.log(unigram_probs[single])
+            
+            for token in lineList[1].split():
+                nextSingle = token
+                nextSingle = knownUni(nextSingle)
+                
+                # Multiplcation of probabilities for the rest of the tokens in the sentence
+                uniLaplaceProb += math.log(uniLaplace(nextSingle))
+                uniAddKProb += math.log(uniAddK(nextSingle, 0.01))
+                uniUnsmoothProb += math.log(unigram_probs[nextSingle])
+                
+                numberOfTokens += 1
+                
+                #Bigram token checked
+                bigramWord = single + " " + nextSingle
+                bigramWord = knownBi(bigramWord, single)
+                biLaplaceProb += math.log(biLaplace(bigramWord, single))
+                biAddKProb += math.log(biAddK(bigramWord, single, 0.01))
+                biUnsmoothProb += math.log(bigram_probs[bigramWord])
+                
+                #For the next bigram
+                single = nextSingle
 
-with open('val.txt', 'r') as file:
-    for line in file:
-        # Split the first token and the rest of the line into a list of 2
-        lineList = line.split(" ", 1)
-        single = knownUni(lineList[0])
-        
-        uniUnsmoothProb = 1
-        uniLaplaceProb = 1
-        uniAddKProb = 1
-        biUnsmoothProb = 1
-        biLaplaceProb = 1
-        biAddKProb = 1
-        
-        # Number of tokens increase for the first word and end of sentence <s>
-        numberOfTokens += 2
-        
-        # Muliplication of probabilities for the first token in the sentence
-        uniLaplaceProb *= math.log(uniLaplace(single))
-        uniAddKProb *= math.log(uniAddK(single, 0.01))
-        uniUnsmoothProb *= math.log(unigram_probs[single])
-        
-        for token in lineList[1].split():
-            nextSingle = token
-            nextSingle = knownUni(nextSingle)
-            
-            # Multiplcation of probabilities for the rest of the tokens in the sentence
-            uniLaplaceProb += math.log(uniLaplace(nextSingle))
-            uniAddKProb += math.log(uniAddK(nextSingle, 0.01))
-            uniUnsmoothProb += math.log(unigram_probs[nextSingle])
-            
-            numberOfTokens += 1
-            
-            #Bigram token checked
-            bigramWord = single + " " + nextSingle
-            bigramWord = knownBi(bigramWord, single)
-            biLaplaceProb += math.log(biLaplace(bigramWord, single))
-            biAddKProb += math.log(biAddK(bigramWord, single, 0.01))
-            biUnsmoothProb += math.log(bigram_probs[bigramWord])
-            
-            #For the next bigram
-            single = nextSingle
+    # Return report of perplexity values
+    return f"""\nPerplexity for Unigrams
+    Unsmoothed: {computePerplexity(numberOfTokens, uniUnsmoothProb)}
+    Laplace: {computePerplexity(numberOfTokens, uniLaplaceProb)}
+    AddK: {computePerplexity(numberOfTokens, uniAddKProb)}
+    \nPerplexity for Bigrams
+    Unsmoothed: {computePerplexity(numberOfTokens, biUnsmoothProb)}
+    Laplace: {computePerplexity(numberOfTokens, biLaplaceProb)}
+    AddK: {computePerplexity(numberOfTokens, biAddKProb)}"""
 
-        """
-        uniUnsmoothTotal += uniUnsmoothProb
-        uniLaplaceTotal += uniLaplaceProb
-        uniAddKTotal += uniAddKProb
-        biUnsmoothTotal += biUnsmoothProb
-        biLaplaceTotal += biLaplaceProb
-        biAddKTotal += biAddKProb
-        """
-        
-# The perplexity calculation
-def split_line_into_ngrams(n, line, prev_n_tokens):
-    ngrams = []
-    tokens = prev_n_tokens + line  # track previous n-1 tokens from previous line
+def computePerplexity(N, log_probability_sum):
+    return math.exp(-log_probability_sum / N)
 
-    # loop through each token in the line
-    for i in range(len(tokens)-(n-1)):
-        # create n-gram starting at token i
-        ngram = tuple(tokens[i : i+n])
-        # add ngram tuple to ngrams list
-        ngrams.append(ngram)        
+if __name__ == "__main__":
+    file_path = "train.txt"  # Adjust path if necessary
+    unigram_probs, bigram_probs, unigram_counts, bigram_counts = process_corpus(file_path)
     
-    return ngrams  
+    print("Sample Unigram Probabilities:")
+    for word, prob in list(unigram_probs.items())[:10]:  # Display first 10 unigrams
+        print(f"P({word}) = {prob:.4f}")
+    
+    print("\nSample Bigram Probabilities:")
+    for bigram, prob in list(bigram_probs.items())[:10]:  # Display first 10 bigrams
+        print(f"P({bigram[1]} | {bigram[0]}) = {prob:.4f}")
 
-def accumulate_perplexity_values(n, tokens, prev_n_tokens):
-    line_ngrams = split_line_into_ngrams(n, tokens, prev_n_tokens)
-    #print("ngrams for this line: \n%s\n" % line_ngrams)
-    num_tokens_in_line = len(tokens)
-    #print(f"num_tokens_in_line: ", num_tokens_in_line)
+    # Setting the unigram_counts, unigram_probs, bigram_counts, and bigram_probs to contain the "UNK".
+    unigram_counts["UNK"] = 0
+    unigram_probs["UNK"] = 0
+    bigram_counts["UNK UNK"] = 0
+    bigram_probs["UNK UNK"] = 0
 
-    line_log_probability_sum = 0
-    for ngram in line_ngrams:
-        probability = 4   # calculate for unsmoothed, laplace, and addK --> make function that's called here, probUni(1-3) and probBi(1-3)
-        line_log_probability_sum += math.log(probability)
-
-    #print("line_log_probability_sum: %f\n" % line_log_probability_sum)
-    return num_tokens_in_line, line_log_probability_sum
-
-def get_perplexity_for_dataset(file_name, n):
-    # N and log_probability_sum are variables to track the values needed to calculate the perplexity
-    N = 0                       # total number of tokens in validation set
-    log_probability_sum = 0     # total sum of each n-gram's probability in the validation set
-    prev_n_tokens = []          # list of the last n-1 tokens from the previous line
-
-    # tokenize the validation corpus, one line (review) at a time
-    with open(file_name, "r") as dataset:
-        for line in dataset:
-            line_tokens = line.split()   # list of tokens in current line
-            #print("Current Line:\n%s\n" % line_tokens)
-            prev_n_tokens = line_tokens[-(n-1):]
-            #print("Last n-1 tokens:\n%s\n" % prev_n_tokens)
-
-            # Add current line's number of tokens and n-gram probabilities to N and log_probability_sum respectively
-            N_temp, log_probability_sum_temp = accumulate_perplexity_values(n, line_tokens, prev_n_tokens)
-            N += N_temp
-            log_probability_sum += log_probability_sum_temp
-            #print("UPDATED N, log_probability_sum: %s, %s\n" % (N, log_probability_sum))
-        
-    # After all lines in corpus are processed, get the perplexity for the validation set
-    return math.exp(-log_probability_sum / N)
-
-def test_perplexity(N, log_probability_sum):
-    return math.exp(-log_probability_sum / N)
-
-print(f"\nPerplexity for Unigrams")
-print(f"Unsmoothed: ", test_perplexity(numberOfTokens, uniUnsmoothProb))
-print(f"Laplace: ", test_perplexity(numberOfTokens, uniLaplaceProb))
-print(f"AddK: ", test_perplexity(numberOfTokens, uniAddKProb))
-print(f"\nPerplexity for Bigrams")
-print(f"Unsmoothed: ", test_perplexity(numberOfTokens, biUnsmoothProb))
-print(f"Laplace: ", test_perplexity(numberOfTokens, biLaplaceProb))
-print(f"AddK: ", test_perplexity(numberOfTokens, biAddKProb))
+    print(calculateProbabilities())
